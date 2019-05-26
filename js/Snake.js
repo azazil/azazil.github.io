@@ -24,10 +24,10 @@ var Snake = /** @class */ (function (_super) {
         _this.roleType = 1; //  角色类型   1 主角  2 敌人  3 主角护卫
         _this.allyType = 2; // 阵营类型  1己方,2敌人
         _this.bodyType = 1; // 身体类型   1单体 ,2蛇形
-        _this.speedObj = { "slow": 2, "normal": 4, "fast": 6, "stop": 0, "rotation": 5 };
+        _this.speedObj = { "slow": 2, "normal": 8, "fast": 6, "stop": 0, "rotation": 360 };
         _this.speedNow = "stop";
         _this.snakeInitSize = 1; //初始体型大小
-        _this.snakeLength = 3; //初始尾巴长度
+        _this.snakeLength = 4; //初始尾巴长度
         _this.kill = 0;
         _this.rotateSpeed = _this.speedObj['rotation'];
         _this.bodyArr = [];
@@ -56,7 +56,7 @@ var Snake = /** @class */ (function (_super) {
         this.pivot(this.width / 2, this.height / 2);
         this.pos(x, y);
         this.visible = true;
-        this.bodySpace = Math.floor(this.width / 10 * 8);
+        this.bodySpace = Math.floor(this.width / 10 * 20);
         for (var index = 1; index <= this.getBodyNum(); index++) {
             this.addBody(this.x - index * this.bodySpace, this.y, this.rotation);
         }
@@ -80,7 +80,7 @@ var Snake = /** @class */ (function (_super) {
     };
     Snake.prototype.headMove = function () {
         var xb, yb;
-        if (this.rotateSpeed <= 0) { //  转向速度小于0,瞬间转向
+        if (this.rotateSpeed < 0) { //  转向速度小于0,瞬间转向
             xb = this.speed * Math.cos(this.targetR * Math.PI / 180);
             yb = this.speed * Math.sin(this.targetR * Math.PI / 180);
             this.rotation = this.targetR;
@@ -134,7 +134,7 @@ var Snake = /** @class */ (function (_super) {
         ele.loadImage("images/" + eleType + this.colorNum + ".png", 0, 0, this.initWidth * this.snakeSize, this.initWidth * this.snakeSize);
         ele.pivot(ele.width / 2, ele.height / 2);
         ele.pos(x, y);
-        this.speedObj["rotation"] = 4 / this.snakeSize;
+        // this.speedObj["rotation"] = 4 / this.snakeSize
     };
     Snake.prototype.speedChange = function () {
         //速度逐渐加快

@@ -130,7 +130,7 @@ var Game = /** @class */ (function () {
         // this.snakeAIRotation()
         this.createEnemy();
         this.shoot();
-        Laya.timer.loop(20, this, this.gameLoop);
+        Laya.timer.loop(40, this, this.gameLoop);
     };
     //游戏主循环
     Game.prototype.gameLoop = function () {
@@ -306,7 +306,7 @@ var Game = /** @class */ (function () {
             if (_this.roleLayer.numChildren < 100) {
                 var role = Laya.Pool.getItemByClass("role", Role);
                 //初始化角色类型，血量与速度
-                var size = randomInt(1, 3);
+                var size = Math.random() + 1;
                 role = new Role(_this.gameMainUI.map.width * Math.random(), _this.gameMainUI.map.height * Math.random(), 40, size);
                 //添加到舞台上
                 // let targetR = Math.atan2(this.snakeSelf.y - role.y, this.snakeSelf.x - role.x) * 180 / Math.PI
@@ -316,21 +316,21 @@ var Game = /** @class */ (function () {
         }, 1000);
     };
     Game.prototype.heroAct = function () {
-        if (this.snakeSelf.speed == 0) {
-            var targetPos = { x: 0, y: 0 };
-            var dis = 100000;
-            for (var i = this.roleLayer.numChildren - 1; i > -1; i--) {
-                var role = this.roleLayer.getChildAt(i);
-                var dis2 = distance(role.x, role.y, this.snakeSelf.x, this.snakeSelf.y);
-                if (dis2 < dis) {
-                    dis = dis2;
-                }
-                targetPos['x'] = role.x;
-                targetPos['y'] = role.y;
-                break;
-            }
-            this.snakeSelf.targetR = Math.atan2(targetPos['y'] - this.snakeSelf.y, targetPos['x'] - this.snakeSelf.x) * 180 / Math.PI;
-        }
+        // if (this.snakeSelf.speed == 0) {
+        //     let targetPos: Object = { x: 0, y: 0 }
+        //     let dis = 100000
+        //     for (let i: number = this.roleLayer.numChildren - 1; i > -1; i--) {
+        //         let role: Role = this.roleLayer.getChildAt(i) as Role
+        //         let dis2 = distance(role.x, role.y, this.snakeSelf.x, this.snakeSelf.y)
+        //         if (dis2 < dis) {
+        //             dis = dis2
+        //         }
+        //         targetPos['x'] = role.x
+        //         targetPos['y'] = role.y
+        //         break
+        //     }
+        //     this.snakeSelf.targetR = Math.atan2(targetPos['y'] - this.snakeSelf.y, targetPos['x'] - this.snakeSelf.x) * 180 / Math.PI
+        // }
         this.snakeSelf.move();
     };
     Game.prototype.enemyAct = function () {
@@ -346,7 +346,7 @@ var Game = /** @class */ (function () {
             //创建弹药，从对象池创建
             var ammo = Laya.Pool.getItemByClass("ammo", Ammo);
             //初始化角色类型，血量与速度
-            ammo = new Ammo(_this.snakeSelf.x, _this.snakeSelf.y, 1, 1, 10, _this.snakeSelf.rotation, 1, "ammo1");
+            ammo = new Ammo(_this.snakeSelf.x, _this.snakeSelf.y, 1, 1, 30, _this.snakeSelf.rotation, 1, "ammo1");
             //添加到舞台上
             _this.ammoLayer.addChild(ammo);
         }, 100);

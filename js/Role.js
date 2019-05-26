@@ -26,10 +26,11 @@ var Role = /** @class */ (function (_super) {
         _this.bodyType = 1; // 身体类型   1单体 ,2蛇形
         _this.style = "npc1"; //样式
         _this.action = "move"; //动作
-        _this.speedObj = { "slow": 2, "normal": 4, "fast": 6, "stop": 0, "rotation": 0 };
+        _this.speedObj = { "slow": 2, "normal": 4, "fast": 6, "stop": 0, "rotation": 360 };
         _this.speedNow = "slow";
         _this.hitRadius = 40; //碰撞检测半径
-        _this.rotateSpeed = _this.speedObj['rotation'];
+        _this.rotateType = 2; // 动画转向方式，默认1为随移动方向，2左右转向，3为不转向
+        _this.rotateSpeed = _this.speedObj['rotation']; //0为不转向，360为瞬间转向
         _this.kill = 0; //击杀数量
         _this.hp = 10; //生命值
         _this.shootInterval = 300; //射击间隔时间。改为射速？
@@ -39,7 +40,7 @@ var Role = /** @class */ (function (_super) {
         _this.roleSize = roleSize;
         _this.hitRadius = hitRadius;
         _this.speed = _this.speedObj[_this.speedNow];
-        _this.rotation = _this.rotationTemp = _this.targetR = targetR;
+        _this.rotation = _this.rotationMove = _this.targetR = targetR;
         _this.roleAni = new Laya.Animation();
         _this.roleAni.loadAnimation("GameRole.ani");
         _this.addChild(_this.roleAni);
@@ -55,8 +56,8 @@ var Role = /** @class */ (function (_super) {
     Role.prototype.move = function () {
         this.rotationChange();
         var xb, yb;
-        xb = this.speed * Math.cos(this.rotation * Math.PI / 180);
-        yb = this.speed * Math.sin(this.rotation * Math.PI / 180);
+        xb = this.speed * Math.cos(this.rotationMove * Math.PI / 180);
+        yb = this.speed * Math.sin(this.rotationMove * Math.PI / 180);
         var pos = { x: this.x, y: this.y };
         var posBefore = { x: this.x, y: this.y };
         if (!(this.x + xb >= game.gameMainUI.map.width - this.width / 2 || this.x + xb <= this.width / 2)) {
@@ -78,21 +79,36 @@ var Role = /** @class */ (function (_super) {
         //碰到边界了
     };
     Role.prototype.rotationChange = function () {
-        if (this.rotateSpeed <= 0) { //  转向速度小于0,瞬间转向
-            this.rotationTemp = this.targetR;
+        var perRotation = Math.abs(this.targetR - this.rotationMove) < this.speedObj['rotation'] ? Math.abs(this.targetR - this.rotationMove) : this.speedObj['rotation'];
+        if (this.targetR < -0 && this.rotationMove > 0 && Math.abs(this.targetR) + this.rotationMove > 180) {
+            perRotation = (180 - this.rotationMove) + (180 + this.targetR) < this.speedObj['rotation'] ? (180 - this.rotationMove) + (180 + this.targetR) : this.speedObj['rotation'];
+            this.rotationMove += perRotation;
         }
         else {
-            var perRotation = Math.abs(this.targetR - this.rotationTemp) < this.speedObj['rotation'] ? Math.abs(this.targetR - this.rotationTemp) : this.speedObj['rotation'];
-            if (this.targetR < -0 && this.rotationTemp > 0 && Math.abs(this.targetR) + this.rotationTemp > 180) {
-                perRotation = (180 - this.rotationTemp) + (180 + this.targetR) < this.speedObj['rotation'] ? (180 - this.rotationTemp) + (180 + this.targetR) : this.speedObj['rotation'];
-                this.rotationTemp += perRotation;
-            }
-            else {
-                this.rotationTemp += this.targetR > this.rotationTemp && Math.abs(this.targetR - this.rotationTemp) <= 180 ? perRotation : -perRotation;
-            }
-            this.rotationTemp = Math.abs(this.rotationTemp) > 180 ? (this.rotationTemp > 0 ? this.rotationTemp - 360 : this.rotationTemp + 360) : this.rotationTemp;
+            this.rotationMove += this.targetR > this.rotationMove && Math.abs(this.targetR - this.rotationMove) <= 180 ? perRotation : -perRotation;
         }
-        this.rotation = this.rotationTemp;
+        this.rotationMove = Math.abs(this.rotationMove) > 180 ? (this.rotationMove > 0 ? this.rotationMove - 360 : this.rotationMove + 360) : this.rotationMove;
+        switch (this.rotateType) {
+            case 1:
+                this.rotation = this.rotationMove;
+                break;
+            case 2:
+                this.rotation = 0;
+                if (this.rotationMove > 90 && this.rotationMove <= 270) {
+                    if (this.roleAni.scaleX > 0)
+                        this.roleAni.scaleX *= -1;
+                }
+                else {
+                    if (this.roleAni.scaleX < 0)
+                        this.roleAni.scaleX *= -1;
+                }
+                break;
+            case 3:
+                this.rotation = 0;
+                break;
+            default:
+                this.rotation = this.rotationMove;
+        }
     };
     /**角色死亡并回收到对象池**/
     Role.prototype.die = function () {
